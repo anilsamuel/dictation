@@ -1,7 +1,7 @@
 <!DOCTYPE html>
     <html>
         <head>
-            <title>Real-time Chat App</title>
+            <title>Real-time Dictation App</title>
             <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
             <style>
                 body {
@@ -69,19 +69,13 @@
                 const form = document.querySelector("form");
                 const input = document.querySelector(".input");
                 const messages = document.querySelector(".messages");
-                const username = prompt("Please enter a nickname: ", "");
-                const socket = io();
 
                 form.addEventListener("submit", function(event) {
                     event.preventDefault();
-
                     addMessage(username + ": " + input.value);
-
                     input.value = "";
                     return false;
                 }, false);
-
-                addMessage("You have joined the chat as '" + username  + "'.");
 
                 function addMessage(message) {
                     const li = document.createElement("li");
