@@ -3,6 +3,7 @@
         <head>
             <title>Real-time Dictation App</title>
             <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+            <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
             <style>
                 body {
                     margin: 0;
@@ -62,17 +63,25 @@
         <body>
             <ul class="messages"></ul>
             <form>
+                <button onclick="speakNextWord();">Next word</button>
                 <input type="text" class="input" autocomplete="off" autofocus />
-                <button>Send</button>
+                <button id='sendBtn'>Send</button>
             </form>
             <script>
                 const form = document.querySelector("form");
                 const input = document.querySelector(".input");
                 const messages = document.querySelector(".messages");
-
-                form.addEventListener("submit", function(event) {
+                
+                $.get('words.txt', function(data) {
+                    words = data.split("\n");
+                    console.log(JSON.stringify(words));
+                });
+                
+                document.getElementById('sendBtn').addEventListener("click", function(event) {
                     event.preventDefault();
-                    addMessage(username + ": " + input.value);
+                    const nextWord = window.sessionStorage.getItem("nextWord");
+                    const status = input.value == nextWord ? 'RIGHT' : 'WRONG';
+                    addMessage(input.value + ':' + status);
                     input.value = "";
                     return false;
                 }, false);
@@ -81,7 +90,20 @@
                     const li = document.createElement("li");
                     li.innerHTML = message;
                     messages.appendChild(li);
-                    window.scrollTo(0, document.body.scrollHeight);
+                    //window.scrollTo(0, document.body.scrollHeight);
+                }
+                
+                function speakNextWord(){
+                    event.preventDefault();
+                    let next = Math.floor((Math.random() * words.length));
+                    const nextWord = words.splice(next, next)[0];
+                    speak(nextWord);
+                    window.sessionStorage.setItem("nextWord", nextWord);
+                    return false;
+                }
+                
+                function speak(text){
+                    speechSynthesis.speak(new SpeechSynthesisUtterance(text));
                 }
             </script>
         </body>
