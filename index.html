@@ -1,110 +1,151 @@
 <!DOCTYPE html>
-    <html>
-        <head>
-            <title>Real-time Dictation App</title>
-            <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-            <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
-            <style>
-                body {
-                    margin: 0;
-                    font-family: sans-serif;
-                }
+<html>
 
-                form {
-                    position: fixed;
-                    bottom: 0;
-                    left: 0;
-                    width: 100%;
-                    display: flex;
-                    box-sizing: border-box;
-                    padding: 0.25rem;
-                }
+<head>
+    <title>Real-time Dictation App</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+        }
 
-                form input {
-                    border: 0;
-                    padding: 0.5rem;
-                    width: 100%;
-                    outline: 0;
-                    margin-right: 0.5rem;
-                    border-radius: 0.25rem;
-                    background: #ccc;
-                }
+        form {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            box-sizing: border-box;
+            padding: 0.25rem;
+        }
 
-                form button {
-                    width: 6rem;
-                    background-color: #1b8c00;
-                    color: white;
-                    border: none;
-                    padding: 0.5rem;
-                    cursor: pointer;
-                    border-radius: 0.25rem;
-                    text-transform: uppercase;
-                }
+        form input {
+            border: 0;
+            padding: 0.5rem;
+            width: 100%;
+            outline: 0;
+            margin-right: 0.5rem;
+            border-radius: 0.25rem;
+            background: #ccc;
+        }
 
-                form button:hover {
-                    background-color: #166d01;
-                }
+        form button {
+            width: 6rem;
+            background-color: #1b8c00;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 0.25rem;
+            text-transform: uppercase;
+            margin: 10px;
+        }
 
-                .messages {
-                    margin: 0;
-                    padding: 0;
-                    margin-bottom: 3rem;
-                }
+        form button:hover {
+            background-color: #166d01;
+        }
 
-                .messages li {
-                    padding: 0.5rem;
-                }
+        .messages {
+            margin: 0;
+            padding: 0;
+            margin-bottom: 3rem;
+        }
 
-                .messages li:nth-child(odd) {
-                    background: #eee;
-                }
-            </style>
-        </head>
-        <body>
-            <ul class="messages"></ul>
-            <form>
-                <button onclick="speakNextWord();">Next word</button>
-                <input type="text" class="input" autocomplete="off" autofocus />
-                <button id='sendBtn'>Send</button>
-            </form>
-            <script>
-                const form = document.querySelector("form");
-                const input = document.querySelector(".input");
-                const messages = document.querySelector(".messages");
-                
-                $.get('words.txt', function(data) {
-                    words = data.split("\n");
-                    console.log(JSON.stringify(words));
-                });
-                
-                document.getElementById('sendBtn').addEventListener("click", function(event) {
-                    event.preventDefault();
-                    const nextWord = window.sessionStorage.getItem("nextWord");
-                    const status = input.value == nextWord ? 'RIGHT' : 'WRONG';
-                    addMessage(input.value + ':' + status);
-                    input.value = "";
-                    return false;
-                }, false);
+        .messages li {
+            padding: 0.5rem;
+        }
 
-                function addMessage(message) {
-                    const li = document.createElement("li");
-                    li.innerHTML = message;
-                    messages.appendChild(li);
-                    //window.scrollTo(0, document.body.scrollHeight);
-                }
-                
-                function speakNextWord(){
-                    event.preventDefault();
-                    let next = Math.floor((Math.random() * words.length));
-                    const nextWord = words.splice(next, next)[0];
-                    speak(nextWord);
-                    window.sessionStorage.setItem("nextWord", nextWord);
-                    return false;
-                }
-                
-                function speak(text){
-                    speechSynthesis.speak(new SpeechSynthesisUtterance(text));
-                }
-            </script>
-        </body>
-    </html>
+        .messages li:nth-child(odd) {
+            background: #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <ul class="messages"></ul>
+    <form>
+        <button id='nextBtn'>Next word</button>
+        <input type="text" class="input" autocomplete="off" autofocus />
+        <button id='repeatBtn'>Repeat</button>
+        <button id='sendBtn'>Send</button>
+    </form>
+    <script>
+        const form = document.querySelector("form");
+        const input = document.querySelector(".input");
+        const messages = document.querySelector(".messages");
+        const nextBtn = document.querySelector("#nextBtn");
+        const sendBtn = document.querySelector("#sendBtn");
+        const repeatBtn = document.querySelector("#repeatBtn");
+
+        let score = 0,
+            total = 0;
+
+        $('html').bind('keypress', function (e) {
+            if (e.keyCode == 13) {
+                return false;
+            }
+        });
+
+        $.get('words.txt', function (data) {
+            words = data.split("\n");
+            console.log(JSON.stringify(words));
+        });
+
+        nextBtn.addEventListener("click", function (event) {
+            event.preventDefault();
+            speakNextWord();
+        }, false);
+
+        repeatBtn.addEventListener("click", function (event) {
+            event.preventDefault();
+            repeatWord();
+        }, false);
+
+        sendBtn.addEventListener("click", function (event) {
+            event.preventDefault();
+            evaluate();
+        }, false);
+
+        function evaluate() {
+            total++;
+            const nextWord = window.sessionStorage.getItem("nextWord").trim().toLowerCase();
+            const word = input.value.trim().toLowerCase();
+            input.value = "";
+            const status = word === nextWord ? 'RIGHT' : 'WRONG';
+            if (status == 'RIGHT') score++;
+            addMessage(word + ':' + status + ' [' + nextWord + '] : ' + score + '/' + total);
+            return false;
+        }
+
+        function addMessage(message) {
+            const li = document.createElement("li");
+            li.innerHTML = message;
+            messages.appendChild(li);
+            //window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        function repeatWord() {
+            event.preventDefault();
+            const word = window.sessionStorage.getItem("nextWord").trim().toLowerCase();
+            speak(word);
+            return false;
+        }
+
+        function speakNextWord() {
+            event.preventDefault();
+            let next = Math.floor((Math.random() * words.length));
+            const nextWord = words.splice(next, next)[0];
+            speak(nextWord);
+            window.sessionStorage.setItem("nextWord", nextWord);
+            return false;
+        }
+
+        function speak(text) {
+            speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+        }
+    </script>
+</body>
+
+</html>
