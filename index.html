@@ -115,15 +115,18 @@
             input.value = "";
             const status = word === nextWord ? 'RIGHT' : 'WRONG';
             if (status == 'RIGHT') score++;
-            addMessage(word + ':' + status + ' [' + nextWord + '] : ' + score + '/' + total);
+            addMessage(word + ' [' + nextWord + '] : ' + score + '/' + total, status);
             return false;
         }
 
-        function addMessage(message) {
+        function addMessage(message, status) {
             const li = document.createElement("li");
+            li.style.color = "red";
+            if (status === 'RIGHT')
+                li.style.color = "green";
             li.innerHTML = message;
             messages.appendChild(li);
-            //window.scrollTo(0, document.body.scrollHeight);
+            li.scrollIntoView();
         }
 
         function repeatWord() {
