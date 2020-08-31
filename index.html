@@ -66,6 +66,7 @@
 <body>
     <ul class="messages"></ul>
     <form>
+        <select id="voice"></select>
         <button id='nextBtn'>Next word</button>
         <input type="text" class="input" autocomplete="off" autofocus />
         <button id='repeatBtn'>Repeat</button>
@@ -78,9 +79,21 @@
         const nextBtn = document.querySelector("#nextBtn");
         const sendBtn = document.querySelector("#sendBtn");
         const repeatBtn = document.querySelector("#repeatBtn");
+        const voiceSel = document.querySelector("#voice");
+        var voices = [];
+        const ssu = new SpeechSynthesisUtterance()
 
         let score = 0,
             total = 0;
+
+        window.speechSynthesis.onvoiceschanged = function () {
+            voices = window.speechSynthesis.getVoices();
+            voiceSel.options.length = 0;
+            voices.forEach(v => {
+                console.log(JSON.stringify(v))
+                voiceSel.options[voiceSel.options.length] = new Option(v.name + ' (' + v.lang + ')', voiceSel.options.length)
+            });
+        };
 
         $('html').bind('keypress', function (e) {
             if (e.keyCode == 13) {
@@ -90,22 +103,24 @@
 
         $.get('words.txt', function (data) {
             words = data.split("\n");
-            console.log(JSON.stringify(words));
         });
 
         nextBtn.addEventListener("click", function (event) {
             event.preventDefault();
             speakNextWord();
+            input.focus();
         }, false);
 
         repeatBtn.addEventListener("click", function (event) {
             event.preventDefault();
             repeatWord();
+            input.focus();
         }, false);
 
         sendBtn.addEventListener("click", function (event) {
             event.preventDefault();
             evaluate();
+            input.focus();
         }, false);
 
         function evaluate() {
@@ -146,7 +161,9 @@
         }
 
         function speak(text) {
-            speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+            ssu.text = text;
+            ssu.voice = voices[voiceSel.selectedIndex];
+            window.speechSynthesis.speak(ssu);
         }
     </script>
 </body>
