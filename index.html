@@ -133,9 +133,16 @@
             const word = input.value.trim().toLowerCase();
             input.value = "";
             const status = word === nextWord ? 'RIGHT' : 'WRONG';
-            if (status == 'RIGHT') score++;
-            addMessage(word + ' [' + nextWord + '] : ' + score + '/' + total, status);
-            return false;
+            new Promise((resolve, reject) => {
+                $.get('https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + nextWord + '?key=0aadccf3-b18f-460d-9d3b-7089f89e3aad', function (data) {
+                    resolve(data)
+                })
+            }).then(result => {
+                console.log(result[0]["shortdef"][0]);
+                if (status == 'RIGHT') score++;
+                addMessage(word + ' [' + nextWord + '] : ' + score + '/' + total + ' meaning: ' + result[0]["shortdef"][0], status);
+                return false;
+            });
         }
 
         function addMessage(message, status) {
