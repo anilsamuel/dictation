@@ -89,12 +89,14 @@
             total = 0;
 
         window.speechSynthesis.onvoiceschanged = function () {
+            const si = voiceSel.selectedIndex
             voices = window.speechSynthesis.getVoices();
             voiceSel.options.length = 0;
             voices.forEach(v => {
                 console.log(JSON.stringify(v))
                 voiceSel.options[voiceSel.options.length] = new Option(v.name + ' (' + v.lang + ')', voiceSel.options.length)
             });
+            voiceSel.selectedIndex = si >= 0 ? si : 0;
         };
 
         $('html').bind('keypress', function (e) {
