@@ -72,14 +72,12 @@
         <button id='nextBtn'>Next word</button>
         <input type="text" class="input" autocomplete="off" autofocus />
         <button id='repeatBtn'>Repeat</button>
-        <!-- <button id='sendBtn'>Send</button> -->
     </form>
     <script>
         const form = document.querySelector("form");
         const input = document.querySelector(".input");
         const messages = document.querySelector(".messages");
         const nextBtn = document.querySelector("#nextBtn");
-        // const sendBtn = document.querySelector("#sendBtn");
         const repeatBtn = document.querySelector("#repeatBtn");
         const voiceSel = document.querySelector("#voice");
         var voices = [];
@@ -108,8 +106,12 @@
         });
 
         $.get('words.txt', function (data) {
-            words = data.split("\n");
+            words = shuffle(data.split("\n"));
         });
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
 
         nextBtn.addEventListener("click", function (event) {
             event.preventDefault();
@@ -123,12 +125,6 @@
             input.focus();
         }, false);
 
-        // sendBtn.addEventListener("click", function (event) {
-        //     event.preventDefault();
-        //     evaluate();
-        //     input.focus();
-        // }, false);
-
         function evaluate() {
             total++;
             const nextWord = window.sessionStorage.getItem("nextWord").trim().toLowerCase();
@@ -140,9 +136,12 @@
                     resolve(data)
                 })
             }).then(result => {
-                console.log(result[0]["shortdef"][0]);
-                if (status == 'RIGHT') score++;
-                addMessage(word + ' [' + nextWord + '] : ' + score + '/' + total + ' meaning: ' + result[0]["shortdef"][0], status);
+                if (undefined === result[0]["shortdef"])
+                    console.log(nextWord + '=>' + JSON.stringify(result))
+                else {
+                    if (status == 'RIGHT') score++;
+                    addMessage(word + ' [' + nextWord + '] : ' + score + '/' + total + ' meaning: ' + result[0]["shortdef"][0], status);
+                }
                 return false;
             });
         }
