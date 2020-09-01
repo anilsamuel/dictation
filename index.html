@@ -72,14 +72,14 @@
         <button id='nextBtn'>Next word</button>
         <input type="text" class="input" autocomplete="off" autofocus />
         <button id='repeatBtn'>Repeat</button>
-        <button id='sendBtn'>Send</button>
+        <!-- <button id='sendBtn'>Send</button> -->
     </form>
     <script>
         const form = document.querySelector("form");
         const input = document.querySelector(".input");
         const messages = document.querySelector(".messages");
         const nextBtn = document.querySelector("#nextBtn");
-        const sendBtn = document.querySelector("#sendBtn");
+        // const sendBtn = document.querySelector("#sendBtn");
         const repeatBtn = document.querySelector("#repeatBtn");
         const voiceSel = document.querySelector("#voice");
         var voices = [];
@@ -101,7 +101,9 @@
 
         $('html').bind('keypress', function (e) {
             if (e.keyCode == 13) {
-                return false;
+                event.preventDefault();
+                evaluate();
+                input.focus();
             }
         });
 
@@ -121,11 +123,11 @@
             input.focus();
         }, false);
 
-        sendBtn.addEventListener("click", function (event) {
-            event.preventDefault();
-            evaluate();
-            input.focus();
-        }, false);
+        // sendBtn.addEventListener("click", function (event) {
+        //     event.preventDefault();
+        //     evaluate();
+        //     input.focus();
+        // }, false);
 
         function evaluate() {
             total++;
