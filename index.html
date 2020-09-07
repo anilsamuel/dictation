@@ -136,8 +136,11 @@
                     resolve(data)
                 })
             }).then(result => {
-                if (undefined === result[0]["shortdef"])
+                if (undefined === result[0]["shortdef"]) {
                     console.log(nextWord + '=>' + JSON.stringify(result))
+                    if (status == 'RIGHT') score++;
+                    addMessage(word + ' [' + nextWord + '] : ' + score + '/' + total, status);
+                }
                 else {
                     if (status == 'RIGHT') score++;
                     addMessage(word + ' [' + nextWord + '] : ' + score + '/' + total + ' meaning: ' + result[0]["shortdef"][0], status);
