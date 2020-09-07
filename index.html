@@ -11,7 +11,7 @@
             font-family: sans-serif;
         }
 
-        form {
+        .inputs {
             position: fixed;
             bottom: 0;
             left: 0;
@@ -21,7 +21,7 @@
             padding: 0.25rem;
         }
 
-        form input {
+        .inputs input {
             border: 0;
             padding: 0.5rem;
             width: 100%;
@@ -32,7 +32,7 @@
             font-size: x-large;
         }
 
-        form button {
+        .inputs button {
             width: 6rem;
             background-color: #1b8c00;
             color: white;
@@ -44,7 +44,7 @@
             margin: 10px;
         }
 
-        form button:hover {
+        input button:hover {
             background-color: #166d01;
         }
 
@@ -67,12 +67,12 @@
 
 <body>
     <ul class="messages"></ul>
-    <form>
+    <div class="inputs">
         <select id="voice"></select>
         <button id='nextBtn'>Next word</button>
         <input type="text" class="input" autocomplete="off" autofocus />
         <button id='repeatBtn'>Repeat</button>
-    </form>
+    </div>
     <script>
         const form = document.querySelector("form");
         const input = document.querySelector(".input");
