@@ -88,14 +88,15 @@
             total = 0;
 
         window.speechSynthesis.onvoiceschanged = function () {
-            const si = voiceSel.selectedIndex
+            //const si = voiceSel.selectedIndex
             voices = window.speechSynthesis.getVoices();
             voiceSel.options.length = 0;
             voices.forEach(v => {
                 console.log(JSON.stringify(v))
                 voiceSel.options[voiceSel.options.length] = new Option(v.name + ' (' + v.lang + ')', voiceSel.options.length)
             });
-            voiceSel.selectedIndex = si >= 0 ? si : 0;
+            voiceSel.selectedIndex = window.localStorage.getItem('voiceSel');
+            //voiceSel.selectedIndex = si >= 0 ? si : 0;
         };
 
         $('html').bind('keypress', function (e) {
@@ -193,6 +194,7 @@
 
         window.onbeforeunload = function () {
             window.localStorage.setItem('wrongs', JSON.stringify([...wrongs]));
+            window.localStorage.setItem('voiceSel', voiceSel.selectedIndex);
         };
 
         window.onload = function () {
