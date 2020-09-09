@@ -81,6 +81,7 @@
         const repeatBtn = document.querySelector("#repeatBtn");
         const voiceSel = document.querySelector("#voice");
         var voices = [];
+        var wrongs = new Set();
         const ssu = new SpeechSynthesisUtterance()
 
         let score = 0,
@@ -100,7 +101,9 @@
         $('html').bind('keypress', function (e) {
             if (e.keyCode == 13) {
                 event.preventDefault();
-                evaluate();
+                const word = input.value.trim();
+                if ("" === word) repeatWord();
+                else evaluate();
                 input.focus();
             }
         });
@@ -125,32 +128,38 @@
             input.focus();
         }, false);
 
-        function evaluate() {
+        evaluate = () => {
             total++;
             const nextWord = window.sessionStorage.getItem("nextWord").trim().toLowerCase();
             const word = input.value.trim().toLowerCase();
             input.value = "";
-            const status = word === nextWord ? 'RIGHT' : 'WRONG';
-            new Promise((resolve, reject) => {
-                $.get('https://www.dictionaryapi.com/api/v3/references/collegiate/json/' + nextWord + '?key=00d853de-bab7-4180-9b75-c1cd0db086ac', function (data) {
-                //$.get('https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + nextWord + '?key=0aadccf3-b18f-460d-9d3b-7089f89e3aad', function (data) {
+            const message = getMessage(word, nextWord)
+                .then(result => {
+                    addMessage(result.text, result.status);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+            return false;
+        }
+
+        getMessage = (enteredWord, actualWord) => {
+            const status = enteredWord === actualWord ? 'RIGHT' : 'WRONG';
+            if (status == 'RIGHT') { score++; wrongs.delete(actualWord) }
+            else wrongs.add(actualWord);
+            const percent = Math.round(score / total * 100);
+            return new Promise((resolve, reject) => {
+                $.get('https://www.dictionaryapi.com/api/v3/references/collegiate/json/' + actualWord + '?key=00d853de-bab7-4180-9b75-c1cd0db086ac', function (data) {
+                    //$.get('https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + actualWord + '?key=0aadccf3-b18f-460d-9d3b-7089f89e3aad', function (data) {
                     resolve(data)
                 })
             }).then(result => {
-                if (undefined === result[0]["shortdef"]) {
-                    console.log(nextWord + '=>' + JSON.stringify(result))
-                    if (status == 'RIGHT') score++;
-                    addMessage(word + ' [' + nextWord + '] : ' + score + '/' + total, status);
-                }
-                else {
-                    if (status == 'RIGHT') score++;
-                    addMessage(word + ' [' + nextWord + '] : ' + score + '/' + total + ' meaning: ' + result[0]["shortdef"][0], status);
-                }
-                return false;
+                if (undefined === result[0]["shortdef"]) return { text: enteredWord + ' [' + actualWord + '] : ' + score + '/' + total + ' [' + percent + '%]', status: status };
+                else return { text: enteredWord + ' [' + actualWord + '] : ' + score + '/' + total + ' [' + percent + '%]' + ' meaning: ' + result[0]["shortdef"][0], status: status };
             });
         }
 
-        function addMessage(message, status) {
+        addMessage = (message, status) => {
             const li = document.createElement("li");
             li.style.color = "red";
             if (status === 'RIGHT')
@@ -160,14 +169,14 @@
             li.scrollIntoView();
         }
 
-        function repeatWord() {
+        repeatWord = () => {
             event.preventDefault();
             const word = window.sessionStorage.getItem("nextWord").trim().toLowerCase();
             speak(word);
             return false;
         }
 
-        function speakNextWord() {
+        speakNextWord = () => {
             event.preventDefault();
             let next = Math.floor((Math.random() * words.length));
             const nextWord = words.splice(next, 1)[0];
@@ -176,11 +185,19 @@
             return false;
         }
 
-        function speak(text) {
+        speak = (text) => {
             ssu.text = text;
             ssu.voice = voices[voiceSel.selectedIndex];
             window.speechSynthesis.speak(ssu);
         }
+
+        window.onbeforeunload = function () {
+            window.localStorage.setItem('wrongs', JSON.stringify([...wrongs]));
+        };
+
+        window.onload = function () {
+            wrongs = new Set(JSON.parse(window.localStorage.getItem('wrongs')));
+        };
     </script>
 </body>
 
