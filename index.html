@@ -100,12 +100,19 @@
         };
 
         $('html').bind('keypress', function (e) {
-            if (e.keyCode == 13) {
+            console.log(e.keyCode + ' ')
+            if (e.keyCode >= 65 && e.keyCode <= 122)
+                return;
+            else if (e.keyCode == 13) {
                 event.preventDefault();
                 const word = input.value.trim();
                 if ("" === word) repeatWord();
                 else evaluate();
                 input.focus();
+            } else {
+                nextWord();
+                event.preventDefault();
+                return;
             }
         });
 
@@ -119,7 +126,7 @@
 
         nextBtn.addEventListener("click", function (event) {
             event.preventDefault();
-            speakNextWord();
+            nextWord();
             input.focus();
         }, false);
 
@@ -177,7 +184,7 @@
             return false;
         }
 
-        speakNextWord = () => {
+        nextWord = () => {
             event.preventDefault();
             let next = Math.floor((Math.random() * words.length));
             const nextWord = words.splice(next, 1)[0];
