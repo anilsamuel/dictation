@@ -70,7 +70,7 @@
     <div class="inputs">
         <select id="voice"></select>
         <button id='nextBtn'>Next word</button>
-        <input type="text" class="input" autocomplete="off" autofocus />
+        <input type="text" class="input" autocomplete="off" spellcheck="false" autofocus />
         <button id='repeatBtn'>Repeat</button>
     </div>
     <script>
@@ -131,13 +131,8 @@
             }
         });
 
-        $.get('words.txt', (data) => {
-            words = shuffle(data.split("\n"));
-        });
-
-        shuffle = (array) => {
-            return array.sort(() => Math.random() - 0.5);
-        }
+        $.get('words.txt', (data) => words = shuffle(data.split("\n")));
+        shuffle = array => array.sort(() => Math.random() - 0.5);
 
         nextBtn.addEventListener("click", (event) => {
             event.preventDefault();
@@ -218,13 +213,8 @@
             window.speechSynthesis.speak(ssu);
         }
 
-        window.onbeforeunload = () => {
-            window.localStorage.setItem('wrongs', JSON.stringify([...wrongs]));
-        };
-
-        window.onload = () => {
-            wrongs = new Set(JSON.parse(window.localStorage.getItem('wrongs')));
-        };
+        window.onbeforeunload = window.localStorage.setItem('wrongs', JSON.stringify([...wrongs]));
+        window.onload = wrongs = new Set(JSON.parse(window.localStorage.getItem('wrongs')));
     </script>
 </body>
 
