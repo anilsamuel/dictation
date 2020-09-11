@@ -176,8 +176,8 @@
             else wrongs.add(actualWord);
             const percent = Math.round(score / total * 100);
             return new Promise((resolve, reject) => {
-                $.get('https://www.dictionaryapi.com/api/v3/references/collegiate/json/' + actualWord + '?key=00d853de-bab7-4180-9b75-c1cd0db086ac', function (data) {
-                    //$.get('https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + actualWord + '?key=0aadccf3-b18f-460d-9d3b-7089f89e3aad', function (data) {
+                $.get('https://www.dictionaryapi.com/api/v3/references/collegiate/json/' + actualWord + '?key=00d853de-bab7-4180-9b75-c1cd0db086ac', (data) => {
+                    //$.get('https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + actualWord + '?key=0aadccf3-b18f-460d-9d3b-7089f89e3aad', (data) => {
                     resolve(data)
                 })
             }).then(result => {
@@ -218,11 +218,11 @@
             window.speechSynthesis.speak(ssu);
         }
 
-        window.onbeforeunload = function () {
+        window.onbeforeunload = () => {
             window.localStorage.setItem('wrongs', JSON.stringify([...wrongs]));
         };
 
-        window.onload = function () {
+        window.onload = () => {
             wrongs = new Set(JSON.parse(window.localStorage.getItem('wrongs')));
         };
     </script>
