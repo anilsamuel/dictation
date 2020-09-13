@@ -24,12 +24,16 @@
         .inputs input {
             border: 0;
             padding: 0.5rem;
-            width: 100%;
+            /* width: 100%; */
             outline: 0;
             margin-right: 0.5rem;
             border-radius: 0.25rem;
             background: #ccc;
             font-size: x-large;
+        }
+
+        .inputs input[type="text"] {
+            flex-grow: 1;
         }
 
         .inputs button {
@@ -68,13 +72,15 @@
 <body>
     <ul class="messages"></ul>
     <div class="inputs">
+        <input type="file" class="input" id="file-input" />
         <select id="voice"></select>
         <button id='nextBtn'>Next word</button>
-        <input type="text" class="input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus />
+        <input type="text" class="input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+            autofocus />
         <button id='repeatBtn'>Repeat</button>
     </div>
     <script>
-        const form = document.querySelector("form");
+        const fileInput = document.querySelector("#file-input");
         const input = document.querySelector(".input");
         const messages = document.querySelector(".messages");
         const nextBtn = document.querySelector("#nextBtn");
@@ -130,9 +136,6 @@
                 return;
             }
         });
-
-        $.get('words.txt', (data) => words = shuffle(data.split("\n")));
-        shuffle = array => array.sort(() => Math.random() - 0.5);
 
         nextBtn.addEventListener("click", (event) => {
             event.preventDefault();
@@ -212,6 +215,22 @@
             ssu.voice = voices[voiceSel.selectedIndex];
             window.speechSynthesis.speak(ssu);
         }
+
+        shuffle = array => array.sort(() => Math.random() - 0.5);
+        loadWords = (event) => {
+            const file = event.target.files[0];
+            if (!file) {
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                var contents = e.target.result;
+                words = shuffle(contents.split("\n"));
+            };
+            reader.readAsText(file);
+        }
+        $.get('words.txt', (data) => words = shuffle(data.split("\n")));
+        fileInput.addEventListener('change', loadWords, false);
 
         window.onbeforeunload = window.localStorage.setItem('wrongs', JSON.stringify([...wrongs]));
         window.onload = wrongs = new Set(JSON.parse(window.localStorage.getItem('wrongs')));
