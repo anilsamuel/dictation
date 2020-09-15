@@ -5,6 +5,7 @@
     <title>Real-time Dictation App</title>
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <script src="turbocommons-es6.js"></script>
     <style>
         body {
             margin: 0;
@@ -89,6 +90,7 @@
         var voices = [];
         var wrongs = new Set();
         const ssu = new SpeechSynthesisUtterance()
+        const StringUtils = org_turbocommons.StringUtils;
 
         let score = 0,
             total = 0;
@@ -122,16 +124,19 @@
         }
 
         $('html').bind('keypress', (e) => {
-            if (e.keyCode >= 65 && e.keyCode <= 122)
+            if (e.keyCode >= 65 && e.keyCode <= 122) //only alphabets allowed as input
                 return;
-            else if (e.keyCode == 13) {
+            else if (e.keyCode == 13) { //Enter on blank input to repeat
                 event.preventDefault();
                 const word = input.value.trim();
                 if ("" === word) repeatWord();
                 else evaluate();
                 input.focus();
-            } else {
+            } else if (e.keyCode == 32) { //Space for next
                 nextWord();
+                event.preventDefault();
+                return;
+            } else {
                 event.preventDefault();
                 return;
             }
@@ -205,6 +210,37 @@
             event.preventDefault();
             let next = Math.floor((Math.random() * words.length));
             const nextWord = words.splice(next, 1)[0];
+            input.placeholder = "";
+            new Promise((resolve, reject) => {
+                $.get('https://api.datamuse.com/words?ml=' + nextWord + '&max=4', (data) => {
+                    resolve(data)
+                })
+            }).then(result => {
+                console.log(nextWord, result)
+                var synonyms = '';
+                result.forEach(element => {
+                    if (StringUtils.compareSimilarityPercent(nextWord, element.word) < 50)
+                        synonyms += element.word + ','
+                });
+                if (undefined === synonyms);
+                else {
+                    input.placeholder = synonyms;
+                };
+            });
+            /*
+                        new Promise((resolve, reject) => {
+                            $.get('https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + nextWord + '?key=0aadccf3-b18f-460d-9d3b-7089f89e3aad', (data) => {
+                                resolve(data)
+                            })
+                        }).then(result => {
+                            console.log(nextWord, result)
+                            const synonyms = result[0]["meta"] ? result[0]["meta"]["syns"][0] : undefined;
+                            if (undefined === synonyms) ;
+                            else {
+                                input.placeholder = synonyms;
+                            };
+                        });
+            */
             speak(nextWord);
             window.sessionStorage.setItem("nextWord", nextWord);
             return false;
