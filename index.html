@@ -79,6 +79,7 @@
         <input type="text" class="input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
             autofocus />
         <button id='repeatBtn'>Repeat</button>
+        <button id='shareBtn'>Share</button>
     </div>
     <script>
         const fileInput = document.querySelector("#file-input");
@@ -86,6 +87,7 @@
         const messages = document.querySelector(".messages");
         const nextBtn = document.querySelector("#nextBtn");
         const repeatBtn = document.querySelector("#repeatBtn");
+        const shareBtn = document.querySelector("#shareBtn");
         const voiceSel = document.querySelector("#voice");
         var voices = [];
         var wrongs = new Set();
@@ -151,6 +153,20 @@
         repeatBtn.addEventListener("click", (event) => {
             event.preventDefault();
             repeatWord();
+            input.focus();
+        }, false);
+
+        shareBtn.addEventListener("click", (event) => {
+            event.preventDefault();
+            new Promise((resolve, reject) => {
+                $.post('https://glot.io/new/plaintext',
+                    { "language": "plaintext", "title": "spelltest", "public": true, "files": [{ "name": "main1.txt", "content": JSON.stringify(words) }] },
+                    (data) => {
+                        resolve(data)
+                    })
+            }).then(result => {
+                input.value = result;
+            });
             input.focus();
         }, false);
 
