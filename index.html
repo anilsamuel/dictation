@@ -159,13 +159,23 @@
         shareBtn.addEventListener("click", (event) => {
             event.preventDefault();
             new Promise((resolve, reject) => {
-                $.post('https://glot.io/new/plaintext',
-                    { "language": "plaintext", "title": "spelltest", "public": true, "files": [{ "name": "main1.txt", "content": JSON.stringify(words) }] },
+                $.post('https://o96zynwo99.execute-api.ap-southeast-2.amazonaws.com/dev/gw', { 
+                        "url": "https://glot.io/new/plaintext", 
+                        "options": { 
+                            "method": "POST", 
+                            "headers": { "Content-Type": "application/json" } }, 
+                        "data": { 
+                            "language": "plaintext", 
+                            "title": "spelltest", 
+                            "public": "true", 
+                            "files": [{ "name": "main1.txt", "content": JSON.stringify(words) }] 
+                        }
+                    },
                     (data) => {
                         resolve(data)
                     })
             }).then(result => {
-                input.value = result;
+                input.value = result.url;
             });
             input.focus();
         }, false);
