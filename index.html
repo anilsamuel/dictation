@@ -142,6 +142,29 @@
         }, false);
 
         shareBtn.addEventListener("click", (event) => {
+            /* POST direct to glot.io not working due to error below; work aroud using CORS enable AWS api, RequestGateway
+            Error: Access to XMLHttpRequest at 'https://glot.io/new/plaintext' from origin 'xxx' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+            $.ajax({
+                type: "POST",
+                url: 'https://glot.io/new/plaintext',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    "language": "plaintext",
+                    "title": "spelltest",
+                    "public": "true",
+                    "files": [{ "name": localDateTime(), "content": words.join(",") }]
+                }),
+                success: (result) => {
+                    const s = JSON.parse(result.body).url.split('/')
+                    input.value = window.location.href.split('?')[0] + '?key=' + s[s.length - 1]
+                },
+                error: (err) => {
+                    console.error('error: ' + JSON.stringify(err))
+                },
+                crossDomain: true,
+                dataType: "json"
+            });
+            */
             $.ajax({
                 type: "POST",
                 url: 'https://n91fmzqbs8.execute-api.ap-southeast-2.amazonaws.com/dev/requestgateway',
