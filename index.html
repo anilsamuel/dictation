@@ -142,11 +142,9 @@
         }, false);
 
         shareBtn.addEventListener("click", (event) => {
-            /* POST direct to glot.io not working due to error below; work aroud using CORS enable AWS api, RequestGateway
-            Error: Access to XMLHttpRequest at 'https://glot.io/new/plaintext' from origin 'xxx' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.
             $.ajax({
                 type: "POST",
-                url: 'https://glot.io/new/plaintext',
+                url: 'https://snippets.glot.io/snippets',
                 contentType: 'application/json',
                 data: JSON.stringify({
                     "language": "plaintext",
@@ -155,36 +153,7 @@
                     "files": [{ "name": localDateTime(), "content": words.join(",") }]
                 }),
                 success: (result) => {
-                    const s = JSON.parse(result.body).url.split('/')
-                    input.value = window.location.href.split('?')[0] + '?key=' + s[s.length - 1]
-                },
-                error: (err) => {
-                    console.error('error: ' + JSON.stringify(err))
-                },
-                crossDomain: true,
-                dataType: "json"
-            });
-            */
-            $.ajax({
-                type: "POST",
-                url: 'https://n91fmzqbs8.execute-api.ap-southeast-2.amazonaws.com/dev/requestgateway',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    "url": "https://glot.io/new/plaintext",
-                    "options": {
-                        "method": "POST",
-                        "headers": { "Content-Type": "application/json" }
-                    },
-                    "data": {
-                        "language": "plaintext",
-                        "title": "spelltest",
-                        "public": "true",
-                        "files": [{ "name": localDateTime(), "content": words.join(",") }]
-                    }
-                }),
-                success: (result) => {
-                    const s = JSON.parse(result.body).url.split('/')
-                    input.value = window.location.href.split('?')[0] + '?key=' + s[s.length - 1]
+                    input.value = window.location.href.split('?')[0] + '?key=' + result.id
                 },
                 error: (err) => {
                     console.error('error: ' + JSON.stringify(err))
@@ -273,20 +242,6 @@
                     input.placeholder = synonyms;
                 };
             });
-            /*
-                        new Promise((resolve, reject) => {
-                        $.get('https://www.dictionaryapi.com/api/v3/references/thesaurus/json/' + nextWord + '?key=0aadccf3-b18f-460d-9d3b-7089f89e3aad', (data) => {
-                            resolve(data)
-                        })
-                    }).then(result => {
-                        console.log(nextWord, result)
-                            const synonyms = result[0]["meta"] ? result[0]["meta"]["syns"][0] : undefined;
-                            if (undefined === synonyms) ;
-                            else {
-                        input.placeholder = synonyms;
-                            };
-                        });
-            */
             speak(nextWord);
             window.sessionStorage.setItem("nextWord", nextWord);
             return false;
@@ -351,6 +306,7 @@
         if (!urlParams.has('key'))
             $.get('words.txt', (data) => words = shuffle(data.split("\n").map(s => s.trim())));
         else {
+            //GET direct to glot.io working surprisingly !!
             $.ajax({
                 type: "GET",
                 url: 'https://snippets.glot.io/snippets/' + urlParams.get('key'),
