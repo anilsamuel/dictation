@@ -110,34 +110,6 @@
         let score = 0,
             total = 0;
 
-        //https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis/getVoices
-        populateVoiceList = () => {
-            if (typeof speechSynthesis === 'undefined') {
-                return;
-            }
-
-            voices = speechSynthesis.getVoices();
-
-            for (var i = 0; i < voices.length; i++) {
-                var option = document.createElement('option');
-                option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
-
-                if (voices[i].default) {
-                    option.textContent += ' -- DEFAULT';
-                }
-
-                option.setAttribute('data-lang', voices[i].lang);
-                option.setAttribute('data-name', voices[i].name);
-                voiceSel.appendChild(option);
-            }
-            voiceSel.selectedIndex = window.localStorage.getItem('voiceSel');
-        }
-
-        populateVoiceList();
-        if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = populateVoiceList;
-        }
-
         $('html').bind('keypress', (e) => {
             if (e.keyCode >= 65 && e.keyCode <= 122) //only alphabets allowed as input
                 return;
@@ -170,7 +142,6 @@
         }, false);
 
         shareBtn.addEventListener("click", (event) => {
-
             $.ajax({
                 type: "POST",
                 url: 'https://n91fmzqbs8.execute-api.ap-southeast-2.amazonaws.com/dev/requestgateway',
@@ -190,7 +161,7 @@
                 }),
                 success: (result) => {
                     const s = JSON.parse(result.body).url.split('/')
-                    input.value = window.location + '?key=' + s[s.length - 1]
+                    input.value = window.location.href.split('?')[0] + '?key=' + s[s.length - 1]
                 },
                 error: (err) => {
                     console.error('error: ' + JSON.stringify(err))
@@ -207,7 +178,7 @@
 
         localDateTime = () => {
             var local = new Date();
-            return local.toJSON() + local.getTimezoneOffset()/60 ;
+            return local.toJSON() + local.getTimezoneOffset() / 60;
         }
 
         evaluate = () => {
@@ -318,11 +289,59 @@
             reader.readAsText(file);
         }
 
-        $.get('words.txt', (data) => words = shuffle(data.split("\n").map(s => s.trim())));
-        fileInput.addEventListener('change', loadWords, false);
+        //https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis/getVoices
+        populateVoiceList = () => {
+            if (typeof speechSynthesis === 'undefined') {
+                return;
+            }
 
+            voices = speechSynthesis.getVoices();
+
+            for (var i = 0; i < voices.length; i++) {
+                var option = document.createElement('option');
+                option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
+
+                if (voices[i].default) {
+                    option.textContent += ' -- DEFAULT';
+                }
+
+                option.setAttribute('data-lang', voices[i].lang);
+                option.setAttribute('data-name', voices[i].name);
+                voiceSel.appendChild(option);
+            }
+            voiceSel.selectedIndex = window.localStorage.getItem('voiceSel');
+        }
+
+        populateVoiceList();
+        if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = populateVoiceList;
+        }
+
+        fileInput.addEventListener('change', loadWords, false);
         window.onbeforeunload = window.localStorage.setItem('wrongs', JSON.stringify([...wrongs]));
         window.onload = wrongs = new Set(JSON.parse(window.localStorage.getItem('wrongs')));
+
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        // for (const entry of urlParams.entries())
+        //     console.log(`${entry[0]}: ${entry[1]}`);
+        if (!urlParams.has('key'))
+            $.get('words.txt', (data) => words = shuffle(data.split("\n").map(s => s.trim())));
+        else {
+            $.ajax({
+                type: "GET",
+                url: 'https://snippets.glot.io/snippets/' + urlParams.get('key'),
+                success: (result) => {
+                    words = result.files[0].content.split(",").map(s => s.trim())
+                },
+                error: (err) => {
+                    console.error('error: ' + JSON.stringify(err))
+                },
+                crossDomain: true,
+                dataType: "json"
+            });
+        }
+
     </script>
 </body>
 
