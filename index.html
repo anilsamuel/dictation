@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html>
+<!--  
+    glot.io API - https://github.com/prasmussen/glot-snippets/tree/master/api_docs
+-->
 
 <head>
     <title>Real-time Dictation App</title>
@@ -23,6 +26,14 @@
         body {
             margin: 0;
             font-family: sans-serif;
+        }
+
+        .watermark {
+            opacity: 0.5;
+            color: BLACK;
+            position: fixed;
+            top: 50%;
+            left: 50%;
         }
 
         .inputs {
@@ -84,6 +95,16 @@
 </head>
 
 <body>
+    <div class="watermark">
+        <ul>
+            <li>Choose the voice from the drop down list.</li>
+            <li>Click on NEXT WORD to hear the word.</li>
+            <li>Use REPEAT the word if needed, try with different voice till it's clear.</li>
+            <li>Hit enter to REPEAT the word.</li>
+            <li>Type in the word and hit enter to submit.</li>
+            <li>Hit space bar to hear NEXT WORD.</li>
+        </ul>
+    </div>
     <ul class="messages"></ul>
     <div class="inputs">
         <input type="file" class="input" id="file-input" />
